@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react';
-import { Button, Text, TextInput, TouchableOpacity, View, BackHandler } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Button, Text, TextInput, TouchableOpacity, View, BackHandler, FlatList, Platform, Keyboard, Alert } from 'react-native';
 import { SafeAreaView, StackActions } from 'react-navigation';
 import { DrawerActions, NavigationDrawerProp } from 'react-navigation-drawer';
-import { FeatureButton } from '@src/components/FeatureButton';
+
+
 
 /**
  * https://reactnavigation.org/docs/4.x/typescript
@@ -11,42 +12,60 @@ type Props = {
     navigation: NavigationDrawerProp<{ userId: string, routeName: string }>;
 }
 
-const MasterScreen = (props: Props) => {
+let idCounter = 0;
 
-    useEffect(() => {
-
-    }, []);
-
-    const onMenuPress = () => {
-        console.log(props.navigation.state);// { key: 'Home', routeName: 'Home' }
-        console.log("Menu pressed");
-        props.navigation.dispatch(DrawerActions.toggleDrawer());
+export const keyExtractor = (item: any) => {
+    if (!item.uniqueId) {
+        item.uniqueId = idCounter;
+        idCounter++;
     }
 
-    const onButtonPress = () => {
-        const pushAction = StackActions.push({
-            routeName: 'Stack1',
-            params: {
-                myUserId: 9,
-            },
-        });
+    return item.uniqueId.toString();
+}
 
-        props.navigation.dispatch(pushAction);
+const MasterScreen = (props: Props) => {
+
+    const [data, setData] = useState(null);
+
+    const loadDataFirstTime = () => {
+
+
+        setTimeout(() => {
+            setData([{}, {}])
+        }, 1000)
+
+        setTimeout(() => {
+            setData([{}, {}])
+        }, 4000)
+    }
+
+    useEffect(() => {
+        loadDataFirstTime();
+    }, []);
+
+    const renderItem = () => {
+        return <Text>Placeholder</Text>
+    }
+
+    const onEndReached = () => {
+        console.log("End reached with data length", data.length)
+        Alert.alert("TEST")
     }
 
 
     return (
         <SafeAreaView style={{ flex: 1 }}>
-            <View style={{ height: 50, backgroundColor: 'red', flexDirection: 'row', alignItems: 'center' }}>
+            <FlatList data={data}
+                keyExtractor={keyExtractor}
+                renderItem={renderItem}
+                onEndReached={onEndReached}
+                onEndReachedThreshold={0.5}
+                bounces={true}
+                removeClippedSubviews={true}
+                keyboardShouldPersistTaps='always'
 
-                <TouchableOpacity style={{ backgroundColor: 'yellow' }}
-                    onPress={() => onMenuPress()}>
-                    <Text>Menu</Text>
-                </TouchableOpacity>
-            </View>
-            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                <FeatureButton />
-            </View>
+
+            />
         </SafeAreaView>
 
     );
